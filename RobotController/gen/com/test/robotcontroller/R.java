@@ -31,15 +31,16 @@ public final class R {
         public static final int up=0x7f020004;
     }
     public static final class id {
-        public static final int action_settings=0x7f090007;
+        public static final int action_settings=0x7f090008;
+        public static final int autoPilotToggleButton=0x7f090006;
         public static final int connect=0x7f090000;
         public static final int connectButton=0x7f090005;
-        public static final int discoverable=0x7f090009;
+        public static final int discoverable=0x7f09000a;
         public static final int downButton=0x7f090002;
         public static final int leftButton=0x7f090004;
-        public static final int paired_list=0x7f090006;
+        public static final int paired_list=0x7f090007;
         public static final int rightButton=0x7f090001;
-        public static final int secure_connect_scan=0x7f090008;
+        public static final int secure_connect_scan=0x7f090009;
         public static final int upButton=0x7f090003;
     }
     public static final class layout {
@@ -55,6 +56,8 @@ public final class R {
     public static final class string {
         public static final int action_settings=0x7f060001;
         public static final int app_name=0x7f060000;
+        public static final int auto_pilot_off=0x7f060013;
+        public static final int auto_pilot_on=0x7f060012;
         public static final int bt_not_enabled_leaving=0x7f060004;
         public static final int button_scan=0x7f06000e;
         /**   BluetoothChat 

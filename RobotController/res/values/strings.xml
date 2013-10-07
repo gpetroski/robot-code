@@ -25,4 +25,6 @@
     <string name="secure_connect">Connect a device</string>
     <string name="insecure_connect">Connect a device - Insecure</string>
     <string name="discoverable">Make discoverable</string>
+    <string name="auto_pilot_on">Auto Pilot On</string>
+    <string name="auto_pilot_off">Auto Pilot Off</string>
 </resources>

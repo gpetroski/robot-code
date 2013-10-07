@@ -10,9 +10,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
+import android.widget.ToggleButton;
 
 import com.test.robotcontroller.bluetooth.BluetoothService;
+import com.test.robotcontroller.bluetooth.MessageQueue;
 
 public class MainActivity extends Activity {
 	private static final String LOG_TAG = MainActivity.class.getCanonicalName();
@@ -20,6 +24,8 @@ public class MainActivity extends Activity {
 	private static final int REQUEST_CONNECT_DEVICE = 2;
 	private BluetoothService bluetoothService;
 	private Intent connectIntent;
+	private MessageQueue messageQueue;
+	private AutoPilotController autoPilotController;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -108,6 +114,14 @@ public class MainActivity extends Activity {
                 return true;
             }
         });
+        
+        ToggleButton toggleAutoButton = (ToggleButton) findViewById(R.id.autoPilotToggleButton);
+        toggleAutoButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton button, boolean isChecked) {
+				bluetoothService.
+			}
+        });	
     }
     
 

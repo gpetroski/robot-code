@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -23,7 +24,16 @@ public class BluetoothService {
 	private BluetoothAdapter bluetoothAdapter;		
     private ConnectThread connectThread;
     private ConnectedThread connectedThread;
-	private int state = 0;	
+	private int state = 0;		
+	private ConcurrentLinkedQueue<String> incomingMessages = new ConcurrentLinkedQueue<String>();
+	
+	public String getNextMessage() {
+		return incomingMessages.poll();
+	}
+
+	public void clearQueue() {
+		incomingMessages.clear();
+	}
    
 	public BluetoothService() throws Exception {
         // Get local Bluetooth adapter
@@ -49,7 +59,7 @@ public class BluetoothService {
 	public Set<BluetoothDevice> getPairedDevices() {
 		return bluetoothAdapter.getBondedDevices();
 	}
-	
+
 	public void connect(String address) {
     	Log.i(LOG_TAG, "Connecting to address: " + address);
         BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
@@ -197,7 +207,10 @@ public class BluetoothService {
 	                // Read from the InputStream
 	                bytes = mmInStream.read(buffer);
 	                // Send the obtained bytes to the UI activity
-	                Log.i(LOG_TAG, new String(buffer, "UTF8"));
+	                
+	                String message = new String(buffer, "UTF8");
+	    			incomingMessages.add(message);
+	                Log.i(LOG_TAG, message);
 	            } catch (IOException e) {
 	                break;
 	            }
