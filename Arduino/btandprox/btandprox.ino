@@ -1,5 +1,6 @@
 #include <SoftwareSerial.h>  
 #include <AFMotor.h>
+#include <aJSON.h>
 
 #define echoPin 7 // Echo Pin
 #define trigPin 8 // Trigger Pin
@@ -12,7 +13,7 @@ int bluetoothRx = 3;  // RX-I pin of bluetooth mate, Arduino D3
 
 int maximumRange = 200; // Maximum range needed
 int minimumRange = 0; // Minimum range needed
-long duration, distance; // Duration used to calculate distance
+int useSerialLog = 1;
 
 SoftwareSerial bluetooth(bluetoothTx, bluetoothRx);
 
@@ -27,52 +28,96 @@ void setup()
   bluetooth.begin(9600);  // Start bluetooth serial at 9600
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
+  Serial.println("Arduino Started");
 }
 
 
 void loop()
 {
-  if(bluetooth.available())  // If the bluetooth sent any characters
-  {
-    // Send any characters the bluetooth prints to the serial monitor
-    char signal = (char)bluetooth.read();
-    Serial.println(signal);
-    if(signal == 'l' || signal == 'r' || signal=='f' || signal == 'b'|| signal == 's') {
-      moveDirection(signal);
-    } else {
-       bluetooth.println("Invalid character " + signal); 
+  char* btData = readBluetoothData();
+  if(btData != NULL) {
+    aJsonObject* command = aJson.parse(btData);
+    aJsonObject* type = aJson.getObjectItem(command, "type");
+    if(strcmp("MOVE",type->valuestring) == 0) {
+      aJsonObject* dir = aJson.getObjectItem(command, "direction");
+      aJsonObject* power = aJson.getObjectItem(command, "power");
+      moveDirection(dir->valuestring[0], power->valuefloat);
     }
-    
+    aJson.deleteItem(command);
   }
-  // Send any characters the Serial monitor prints to the bluetooth
-  long prox = readProximity();
-  Serial.println(prox);
-  bluetooth.println(prox);
+  
+  int prox = readProximity();
+  sendProximity(prox);
 }
 
-void moveDirection(char dir) {
-   switch(dir) {
-     case 'l':
-       bluetooth.println("Moving left");
-       moveMotors(FORWARD, 150, FORWARD, 150);
-      break;
-     case 'r':
-       bluetooth.println("Moving right");
-       moveMotors(BACKWARD, 150, BACKWARD, 150);
-      break;
-     case 'f':
-       bluetooth.println("Moving forward");
-       moveMotors(BACKWARD, 155, FORWARD, 255);
-      break;
-     case 'b':
-       bluetooth.println("Moving backward");
-       moveMotors(FORWARD, 100, BACKWARD, 200);
-      break;  
-     default:
-       bluetooth.println("Stopping motors");
-       moveMotors(RELEASE, 0, RELEASE, 0);
-      break;
-   }   
+char* readBluetoothData() {
+  char btData[1024];
+  int index = 0;
+  while(bluetooth.available())  
+  {
+    char signal = (char)bluetooth.read();
+    btData[index] = signal;    
+    index++;
+    delayMicroseconds(100000);
+  }
+  if(index == 0) {
+    return NULL;
+  } 
+  else {
+    btData[index] = '\0';
+    logMessage("Recieved string from bluetooth: ");
+    logMessage(btData);
+    return btData;
+  }
+}
+
+void moveDirection(char dir, float power) {
+  switch(dir) {
+  case 'L':
+    logMessage("Moving left");
+    moveMotors(FORWARD, 150 * power, FORWARD, 150 * power);
+    break;
+  case 'R':
+    logMessage("Moving right");
+    moveMotors(BACKWARD, 150 * power, BACKWARD, 150 * power);
+    break;
+  case 'F':
+    logMessage("Moving forward");
+    moveMotors(BACKWARD, 155 * power, FORWARD, 255 * power);
+    break;
+  case 'B':
+    logMessage("Moving backward");
+    moveMotors(FORWARD, 100 * power, BACKWARD, 200 * power);
+    break;  
+  default:
+    logMessage("Stopping motors");
+    moveMotors(RELEASE, 0, RELEASE, 0);
+    break;
+  }   
+}
+
+void logMessage(char* message) {
+  if(useSerialLog) {
+    Serial.print("{ \"type\" : \"LOG\", \"message\" : \"");
+    Serial.print(message);
+    Serial.println("\" }");
+  } else {
+    bluetooth.print("{ \"type\" : \"LOG\", \"message\" : \"");
+    bluetooth.print(message);
+    bluetooth.println("\" }");
+  }
+}
+
+void sendProximity(int proximity) {
+  if(useSerialLog) {
+    Serial.print("{ \"type\" : \"PROXIMITY\", \"value\" : ");
+    Serial.print(proximity);
+    Serial.println(" }");
+  } else {
+    bluetooth.print("{ \"type\" : \"PROXIMITY\", \"value\" : ");
+    bluetooth.print(proximity);
+    bluetooth.println(" }");
+  }
 }
 
 void moveMotors(int lmDir, int lmSpeed, int rmDir, int rmSpeed) {
@@ -82,7 +127,8 @@ void moveMotors(int lmDir, int lmSpeed, int rmDir, int rmSpeed) {
   rightMotor.run(rmDir);
 }
 
-long readProximity() {
+int readProximity() {
+  int duration, distance; // Duration used to calculate distance
   delay(50);
   /* The following trigPin/echoPin cycle is used to determine the
    distance of the nearest object by bouncing soundwaves off of it. */
@@ -101,11 +147,12 @@ long readProximity() {
   if (distance >= maximumRange || distance <= minimumRange){
     /* Send a negative number to computer and Turn LED ON 
      to indicate "out of range" */
-     return -1;
+    return -1;
   }
   else {
     /* Send the distance to the computer using Serial protocol, and
      turn LED OFF to indicate successful reading. */
-     return distance;
+    return distance;
   }
 }
+
