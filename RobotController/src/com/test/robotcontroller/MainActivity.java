@@ -119,7 +119,7 @@ public class MainActivity extends Activity {
         toggleAutoButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton button, boolean isChecked) {
-				bluetoothService.
+				//bluetoothService.
 			}
         });	
     }

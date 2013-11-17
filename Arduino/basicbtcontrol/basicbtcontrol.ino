@@ -25,8 +25,8 @@ void setup()
   bluetooth.println("U,9600,N");  // Temporarily Change the baudrate to 9600, no parity
   // 115200 can be too fast at times for NewSoftSerial to relay the data reliably
   bluetooth.begin(9600);  // Start bluetooth serial at 9600
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
+//  pinMode(trigPin, OUTPUT);
+//  pinMode(echoPin, INPUT);
 }
 
 
@@ -45,9 +45,9 @@ void loop()
     
   }
   // Send any characters the Serial monitor prints to the bluetooth
-  long prox = readProximity();
-  Serial.println(prox);
-  bluetooth.println(prox);
+//  long prox = readProximity();
+//  Serial.println(prox);
+//  bluetooth.println(prox);
 }
 
 void moveDirection(char dir) {
