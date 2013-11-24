@@ -16,7 +16,8 @@ import android.widget.ImageButton;
 import android.widget.ToggleButton;
 
 import com.test.robotcontroller.bluetooth.BluetoothService;
-import com.test.robotcontroller.bluetooth.MessageQueue;
+import com.test.robotcontroller.bluetooth.messages.RobotMessageQueue;
+import com.test.robotcontroller.bluetooth.messages.RobotMoveMessage;
 
 public class MainActivity extends Activity {
 	private static final String LOG_TAG = MainActivity.class.getCanonicalName();
@@ -24,7 +25,7 @@ public class MainActivity extends Activity {
 	private static final int REQUEST_CONNECT_DEVICE = 2;
 	private BluetoothService bluetoothService;
 	private Intent connectIntent;
-	private MessageQueue messageQueue;
+	private RobotMessageQueue messageQueue;
 	private AutoPilotController autoPilotController;
 	
 	@Override
@@ -38,8 +39,10 @@ public class MainActivity extends Activity {
         super.onStart();
 		
 		try {
-			BluetoothService.setCurrentService(new BluetoothService());
-			bluetoothService = BluetoothService.getCurrentService();
+			messageQueue = new RobotMessageQueue();
+			BluetoothService.setCurrentService(new BluetoothService(messageQueue));
+			bluetoothService = BluetoothService.getCurrentService();			
+			autoPilotController = new AutoPilotController(messageQueue, bluetoothService);
 		} catch (Exception e) { 
         	Log.e(LOG_TAG, "Bluetooth not supported");
 			finish();
@@ -68,9 +71,9 @@ public class MainActivity extends Activity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_DOWN) {
-                    bluetoothService.sendMessage("r");
+                	sendManualMove("R", 1);
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    bluetoothService.sendMessage("s");
+                	sendManualMove("S", 1);
                 }
                 return true;
             }
@@ -81,9 +84,9 @@ public class MainActivity extends Activity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_DOWN) {
-                    bluetoothService.sendMessage("f");
+                	sendManualMove("F", 1);
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    bluetoothService.sendMessage("s");
+                	sendManualMove("S", 1);
                 }
                 return true;
             }
@@ -94,9 +97,9 @@ public class MainActivity extends Activity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_DOWN) {
-                    bluetoothService.sendMessage("l");
+                	sendManualMove("L", 1);
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    bluetoothService.sendMessage("s");
+                	sendManualMove("S", 1);
                 }
                 return true;
             }
@@ -107,9 +110,9 @@ public class MainActivity extends Activity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_DOWN) {
-                    bluetoothService.sendMessage("b");
+                	sendManualMove("B", 1);
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    bluetoothService.sendMessage("s");
+                	sendManualMove("S", 1);
                 }
                 return true;
             }
@@ -119,9 +122,21 @@ public class MainActivity extends Activity {
         toggleAutoButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton button, boolean isChecked) {
-				//bluetoothService.
+				if(isChecked && !autoPilotController.isRunning()) {
+					new Thread(autoPilotController).start();
+				} else if(autoPilotController.isRunning()){
+					autoPilotController.stop();
+				}
 			}
         });	
+    }
+    
+    public void sendManualMove(String direction, float power) {
+    	if(!autoPilotController.isRunning()) {
+    		bluetoothService.sendMessage(new RobotMoveMessage(direction, power).toJson());
+    	} else {
+    		Log.i(LOG_TAG, "Disable Autopilot to control manually");
+    	}
     }
     
 
@@ -129,6 +144,7 @@ public class MainActivity extends Activity {
     public void onDestroy() {
         super.onDestroy();
         // Stop the Bluetooth chat services
+		autoPilotController.stop();
         if (bluetoothService != null) {
         	bluetoothService.disconnect();
         }

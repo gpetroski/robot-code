@@ -1,16 +1,19 @@
 package com.test.robotcontroller.bluetooth;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
+
+import com.test.robotcontroller.bluetooth.messages.RobotMessageQueue;
 
 public class BluetoothService {
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
@@ -25,17 +28,9 @@ public class BluetoothService {
     private ConnectThread connectThread;
     private ConnectedThread connectedThread;
 	private int state = 0;		
-	private ConcurrentLinkedQueue<String> incomingMessages = new ConcurrentLinkedQueue<String>();
-	
-	public String getNextMessage() {
-		return incomingMessages.poll();
-	}
-
-	public void clearQueue() {
-		incomingMessages.clear();
-	}
-   
-	public BluetoothService() throws Exception {
+	private RobotMessageQueue incomingMessages;
+   	
+	public BluetoothService(RobotMessageQueue queue) throws Exception {
         // Get local Bluetooth adapter
 		bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -43,6 +38,8 @@ public class BluetoothService {
         if (bluetoothAdapter == null) {
             throw new Exception("Bluetooth not supported.");
         }
+        
+        this.incomingMessages = queue;
 	}
 	
 	public boolean isBluetoothEnabled() {
@@ -124,6 +121,14 @@ public class BluetoothService {
         this.state = state;
     }
 	
+	public RobotMessageQueue getIncomingMessages() {
+		return incomingMessages;
+	}
+
+	public void setIncomingMessages(RobotMessageQueue incomingMessages) {
+		this.incomingMessages = incomingMessages;
+	}
+
 	private class ConnectThread extends Thread {
 	    private final BluetoothSocket mmSocket;
 	    private final BluetoothDevice mmDevice;
@@ -197,20 +202,17 @@ public class BluetoothService {
 	        mmOutStream = tmpOut;
 	    }
 	 
-	    public void run() {
-	        byte[] buffer = new byte[1024];  // buffer store for the stream
-	        int bytes; // bytes returned from read()
-	 
+	    public void run() {	 
 	        // Keep listening to the InputStream until an exception occurs
 	        while (true) {
 	            try {
-	                // Read from the InputStream
-	                bytes = mmInStream.read(buffer);
-	                // Send the obtained bytes to the UI activity
-	                
-	                String message = new String(buffer, "UTF8");
-	    			incomingMessages.add(message);
-	                Log.i(LOG_TAG, message);
+	                BufferedReader in = new BufferedReader(new InputStreamReader(mmInStream));
+
+	                String message = in.readLine();
+	                if(message != null) {
+		    			incomingMessages.queueMessage(message);
+		                Log.d(LOG_TAG, message);
+	                }
 	            } catch (IOException e) {
 	                break;
 	            }

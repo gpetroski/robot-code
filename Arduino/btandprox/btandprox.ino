@@ -14,6 +14,8 @@ int bluetoothRx = 3;  // RX-I pin of bluetooth mate, Arduino D3
 int maximumRange = 200; // Maximum range needed
 int minimumRange = 0; // Minimum range needed
 int useSerialLog = 0;
+int bufferIndex = 0;
+int proxIndex = 0;
 
 SoftwareSerial bluetooth(bluetoothTx, bluetoothRx);
 
@@ -35,41 +37,46 @@ void setup()
 void loop()
 {
   char* btData = readBluetoothData();
-//  if(btData != NULL) {
-//    aJsonObject* command = aJson.parse(btData);
-//    aJsonObject* type = aJson.getObjectItem(command, "type");
-//    if(strcmp("MOVE",type->valuestring) == 0) {
-//      aJsonObject* dir = aJson.getObjectItem(command, "direction");
-//      aJsonObject* power = aJson.getObjectItem(command, "power");
-//      moveDirection(dir->valuestring[0], power->valuefloat);
-//    }
-//    aJson.deleteItem(command);
-//  }
+  if(btData != NULL) {
+    Serial.println(btData);
+    aJsonObject* command = aJson.parse(btData);
+    aJsonObject* type = aJson.getObjectItem(command, "type");
+    if(strcmp("MOVE",type->valuestring) == 0) {
+      aJsonObject* dir = aJson.getObjectItem(command, "direction");
+      aJsonObject* power = aJson.getObjectItem(command, "power");
+      moveDirection(dir->valuestring[0], power->valuefloat);
+    }
+    aJson.deleteItem(command);
+  }
   
-  int prox = readProximity();
-  sendProximity(prox);
+  if(proxIndex % 100 == 0) {
+    proxIndex = 0;
+    int prox = readProximity();
+    sendProximity(prox);
+  } else {
+    proxIndex++;
+  }
 }
 
 char* readBluetoothData() {
-  char btData[1024];
-  int index = 0;
-  while(bluetooth.available())  
-  {
-    char signal = (char)bluetooth.read();
-    Serial.println(signal);
-    btData[index] = signal;    
-    index++;
-    delayMicroseconds(100000);
+  char buffer[255];
+  int finished = 0;
+  for(int i = 0; i < bluetooth.available(); i++ ) {
+    char signal = bluetooth.read();
+    buffer[bufferIndex] = signal;
+    if(signal == '}') {
+      buffer[bufferIndex + 1] = '\0';
+      bufferIndex = 0; 
+      finished = 1; 
+    } else {
+      bufferIndex++;
+    }
   }
-  if(index == 0) {
+  if(finished) {
+    return buffer;
+  } else {
     return NULL;
-  } 
-  else {
-    btData[index] = '\0';
-    logMessage("Recieved string from bluetooth: ");
-    logMessage(btData);
-    return btData;
-  }
+  }  
 }
 
 void moveDirection(char dir, float power) {
@@ -105,7 +112,7 @@ void logMessage(char* message) {
   } else {
     bluetooth.print("{ \"type\" : \"LOG\", \"message\" : \"");
     bluetooth.print(message);
-    bluetooth.println("\" }\0");
+    bluetooth.println("\" }");
   }
 }
 
@@ -117,7 +124,7 @@ void sendProximity(int proximity) {
   } else {
     bluetooth.print("{ \"type\" : \"PROXIMITY\", \"value\" : ");
     bluetooth.print(proximity);
-    bluetooth.println(" }\0");
+    bluetooth.println(" }");
   }
 }
 
