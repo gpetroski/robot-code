@@ -17,6 +17,25 @@ int useSerialLog = 0;
 int bufferIndex = 0;
 int proxIndex = 0;
 
+// Message Type
+const int MOVE_MESSAGE_TYPE = 1; // 00000001
+const int MESSAGE_TYPE_BITS = 3; // 00000011
+	
+// DIRECTION
+const int FW = 4;  // 00000100
+const int REVERSE = 8;  // 00001000
+const int LEFT    = 12; // 00001100
+const int RIGHT   = 16; // 00010000
+const int STOP    = 20; // 00010100	
+const int DIRECTION_BITS = 28; // 00011100
+	
+// SPEED
+const int SLOW 	= 0;   // 00100000
+const int MEDIUM  = 64;  // 01000000
+const int FAST    = 96;  // 01100000
+const int FULL    = 128; // 10000000	
+const int SPEED_BITS   = 224; // 11100000
+
 SoftwareSerial bluetooth(bluetoothTx, bluetoothRx);
 
 void setup()
@@ -36,65 +55,65 @@ void setup()
 
 void loop()
 {
-  char* btData = readBluetoothData();
-  if(btData != NULL) {
-    Serial.println(btData);
-    aJsonObject* command = aJson.parse(btData);
-    aJsonObject* type = aJson.getObjectItem(command, "type");
-    if(strcmp("MOVE",type->valuestring) == 0) {
-      aJsonObject* dir = aJson.getObjectItem(command, "direction");
-      aJsonObject* power = aJson.getObjectItem(command, "power");
-      moveDirection(dir->valuestring[0], power->valuefloat);
+  int message = 0;
+  while(message = readBluetoothMessageByte()) {
+    Serial.print("Message type ");
+    Serial.println(message & MESSAGE_TYPE_BITS);
+    if((message & MESSAGE_TYPE_BITS) == MOVE_MESSAGE_TYPE) {
+      Serial.println(message & DIRECTION_BITS);
+      Serial.println(message & SPEED_BITS);
+      moveDirection(message & DIRECTION_BITS, message & SPEED_BITS);
     }
-    aJson.deleteItem(command);
   }
   
-  if(proxIndex % 100 == 0) {
-    proxIndex = 0;
-    int prox = readProximity();
-    sendProximity(prox);
-  } else {
-    proxIndex++;
-  }
+  int prox = readProximity();
+  sendProximity(prox);
 }
 
-char* readBluetoothData() {
-  char buffer[255];
-  int finished = 0;
-  for(int i = 0; i < bluetooth.available() && !finished; i++ ) {
+int readBluetoothMessageByte() {
+  int message = 0;    
+  
+  if(bluetooth.available()) {    
     Serial.println(bluetooth.available());
-    char signal = bluetooth.read();
-    buffer[bufferIndex] = signal;
-    if(signal == '}') {
-      buffer[bufferIndex + 1] = '\0';
-      bufferIndex = 0; 
-      finished = 1; 
-    } else {
-      bufferIndex++;
-    }
+    message = bluetooth.read();
+    Serial.println(message);
   }
-  if(finished) {
-    return buffer;
-  } else {
-    return NULL;
-  }  
+  return message;
 }
 
-void moveDirection(char dir, float power) {
+void moveDirection(int dir, int powerInt) {
+  float power;
+  switch(powerInt) {
+  case SLOW:
+    power = .25;
+    break;
+  case MEDIUM:
+    power = .50;
+    break;
+  case FAST:
+    power = .75;
+    break;
+  case FULL:
+    power = 1;
+    break;
+  default:
+    power = 0;
+  }
+  
   switch(dir) {
-  case 'L':
+  case LEFT:
     logMessage("Moving left");
     moveMotors(FORWARD, 150 * power, FORWARD, 150 * power);
     break;
-  case 'R':
+  case RIGHT:
     logMessage("Moving right");
     moveMotors(BACKWARD, 150 * power, BACKWARD, 150 * power);
     break;
-  case 'F':
+  case FW:
     logMessage("Moving forward");
     moveMotors(BACKWARD, 155 * power, FORWARD, 255 * power);
     break;
-  case 'B':
+  case REVERSE:
     logMessage("Moving backward");
     moveMotors(FORWARD, 100 * power, BACKWARD, 200 * power);
     break;  

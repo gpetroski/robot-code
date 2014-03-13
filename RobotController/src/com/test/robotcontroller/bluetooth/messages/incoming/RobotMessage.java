@@ -1,4 +1,4 @@
-package com.test.robotcontroller.bluetooth.messages;
+package com.test.robotcontroller.bluetooth.messages.incoming;
 
 import com.google.gson.Gson;
 

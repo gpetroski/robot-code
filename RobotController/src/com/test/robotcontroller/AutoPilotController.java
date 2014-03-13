@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.test.robotcontroller.bluetooth.BluetoothService;
 import com.test.robotcontroller.bluetooth.messages.RobotMessageQueue;
-import com.test.robotcontroller.bluetooth.messages.RobotMoveMessage;
+import com.test.robotcontroller.bluetooth.messages.outgoing.RobotMoveMessage;
 
 public class AutoPilotController implements Runnable {
 	private static final String LOG_TAG = AutoPilotController.class.getCanonicalName();
@@ -36,12 +36,17 @@ public class AutoPilotController implements Runnable {
 	
 	public void stop() {
 		this.running = false;
-		move("S", 1);
+		try {
+			Thread.sleep(10);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+    	move(new RobotMoveMessage(RobotMoveMessage.STOP, RobotMoveMessage.FULL));
 	}
 	
-	private void move(String direction, float power) {
-		moveMessage = new RobotMoveMessage(direction, power);
-		bluetooth.sendMessage(moveMessage.toJson());
+	private void move(RobotMoveMessage message) {
+		moveMessage = message;
+		bluetooth.sendMessage(moveMessage.getMessage());
 	}
 	
 	private int getAvgReading() {
@@ -61,11 +66,11 @@ public class AutoPilotController implements Runnable {
 	
 	private void adjustHeading(int proximity) {
 		if(proximity < TOO_CLOSE && proximity > 0) {
-            move("B", .5f);
-            move("R", 1);
-            move("S", 1);
-		} else if (moveMessage == null || moveMessage.getDirection() != "F") {
-			move("F", 1);
+        	move(new RobotMoveMessage(RobotMoveMessage.LEFT, RobotMoveMessage.MEDIUM));
+        	move(new RobotMoveMessage(RobotMoveMessage.RIGHT, RobotMoveMessage.FULL));
+        	move(new RobotMoveMessage(RobotMoveMessage.STOP, RobotMoveMessage.FULL));
+		} else if (moveMessage == null || moveMessage.getDirection() != RobotMoveMessage.FORWARD) {
+        	move(new RobotMoveMessage(RobotMoveMessage.FORWARD, RobotMoveMessage.FULL));
 		}
 	}
 }

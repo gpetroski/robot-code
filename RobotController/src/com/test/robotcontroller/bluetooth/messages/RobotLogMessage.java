@@ -1,5 +1,7 @@
 package com.test.robotcontroller.bluetooth.messages;
 
+import com.test.robotcontroller.bluetooth.messages.incoming.RobotMessage;
+
 
 public class RobotLogMessage extends RobotMessage {
 	private String message;

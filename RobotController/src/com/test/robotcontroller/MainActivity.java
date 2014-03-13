@@ -17,7 +17,7 @@ import android.widget.ToggleButton;
 
 import com.test.robotcontroller.bluetooth.BluetoothService;
 import com.test.robotcontroller.bluetooth.messages.RobotMessageQueue;
-import com.test.robotcontroller.bluetooth.messages.RobotMoveMessage;
+import com.test.robotcontroller.bluetooth.messages.outgoing.RobotMoveMessage;
 
 public class MainActivity extends Activity {
 	private static final String LOG_TAG = MainActivity.class.getCanonicalName();
@@ -71,9 +71,9 @@ public class MainActivity extends Activity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_DOWN) {
-                	sendManualMove("R", 1);
+                	sendManualMove(new RobotMoveMessage(RobotMoveMessage.RIGHT, RobotMoveMessage.FULL));
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                	sendManualMove("S", 1);
+                	sendManualMove(new RobotMoveMessage(RobotMoveMessage.STOP, RobotMoveMessage.FULL));
                 }
                 return true;
             }
@@ -84,9 +84,9 @@ public class MainActivity extends Activity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_DOWN) {
-                	sendManualMove("F", 1);
+                	sendManualMove(new RobotMoveMessage(RobotMoveMessage.FORWARD, RobotMoveMessage.FULL));
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                	sendManualMove("S", 1);
+                	sendManualMove(new RobotMoveMessage(RobotMoveMessage.STOP, RobotMoveMessage.FULL));
                 }
                 return true;
             }
@@ -97,9 +97,9 @@ public class MainActivity extends Activity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_DOWN) {
-                	sendManualMove("L", 1);
+                	sendManualMove(new RobotMoveMessage(RobotMoveMessage.LEFT, RobotMoveMessage.FULL));
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                	sendManualMove("S", 1);
+                	sendManualMove(new RobotMoveMessage(RobotMoveMessage.STOP, RobotMoveMessage.FULL));
                 }
                 return true;
             }
@@ -110,9 +110,9 @@ public class MainActivity extends Activity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_DOWN) {
-                	sendManualMove("B", 1);
+                	sendManualMove(new RobotMoveMessage(RobotMoveMessage.REVERSE, RobotMoveMessage.FULL));
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                	sendManualMove("S", 1);
+                	sendManualMove(new RobotMoveMessage(RobotMoveMessage.STOP, RobotMoveMessage.FULL));
                 }
                 return true;
             }
@@ -131,9 +131,9 @@ public class MainActivity extends Activity {
         });	
     }
     
-    public void sendManualMove(String direction, float power) {
+    public void sendManualMove(RobotMoveMessage message) {
     	if(!autoPilotController.isRunning()) {
-    		bluetoothService.sendMessage(new RobotMoveMessage(direction, power).toJson());
+    		bluetoothService.sendMessage(message.getMessage());
     	} else {
     		Log.i(LOG_TAG, "Disable Autopilot to control manually");
     	}

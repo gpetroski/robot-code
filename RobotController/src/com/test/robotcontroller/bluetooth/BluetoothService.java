@@ -46,7 +46,7 @@ public class BluetoothService {
 		return bluetoothAdapter.isEnabled();
 	}
 	
-	public void sendMessage(String message) {
+	public void sendMessage(Byte message) {
 		Log.d(LOG_TAG, "Sending message " + message);
 		if(connectedThread != null && state == STATE_CONNECTED) {
 			connectedThread.write(message);
@@ -220,9 +220,9 @@ public class BluetoothService {
 	    }
 	 
 	    /* Call this from the main activity to send data to the remote device */
-	    public void write(String message) {
+	    public void write(Byte message) {
 	        try {
-	            mmOutStream.write(message.getBytes());
+	            mmOutStream.write(message);
 	        } catch (IOException e) { }
 	    }
 	 
