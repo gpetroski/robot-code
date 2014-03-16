@@ -5,6 +5,7 @@ import android.util.Log;
 import com.test.robotcontroller.bluetooth.BluetoothService;
 import com.test.robotcontroller.bluetooth.messages.RobotMessageQueue;
 import com.test.robotcontroller.bluetooth.messages.outgoing.RobotMoveMessage;
+import com.test.robotcontroller.tts.TTSLogger;
 
 public class AutoPilotController implements Runnable {
 	private static final String LOG_TAG = AutoPilotController.class.getCanonicalName();
@@ -26,7 +27,11 @@ public class AutoPilotController implements Runnable {
 	public void run() {
 		running = true;
 		while(running) {
-			adjustHeading(getAvgReading());
+			try {
+				adjustHeading(getAvgReading());
+			} catch (InterruptedException e) {
+				Log.e(LOG_TAG, e.getMessage());
+			}
 		}
 	}
 
@@ -41,7 +46,7 @@ public class AutoPilotController implements Runnable {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-    	move(new RobotMoveMessage(RobotMoveMessage.STOP, RobotMoveMessage.FULL));
+    	move(new RobotMoveMessage(RobotMoveMessage.Direction.STOP, RobotMoveMessage.Speed.FULL));
 	}
 	
 	private void move(RobotMoveMessage message) {
@@ -52,7 +57,7 @@ public class AutoPilotController implements Runnable {
 	private int getAvgReading() {
 		int sum = 0;
 		if(proximities.getProximityCount() > MAX_SIZE) {
-			Log.e(LOG_TAG, "Queue is backing up!!!");
+			TTSLogger.log("Queue is backing up!");
 		}
 		if(proximities.getProximityCount() >= QUEUE_SIZE) {
 			for(int i = 0; i < QUEUE_SIZE; i++) {
@@ -64,13 +69,20 @@ public class AutoPilotController implements Runnable {
 		}
 	}
 	
-	private void adjustHeading(int proximity) {
+	private void adjustHeading(int proximity) throws InterruptedException {
 		if(proximity < TOO_CLOSE && proximity > 0) {
-        	move(new RobotMoveMessage(RobotMoveMessage.LEFT, RobotMoveMessage.MEDIUM));
-        	move(new RobotMoveMessage(RobotMoveMessage.RIGHT, RobotMoveMessage.FULL));
-        	move(new RobotMoveMessage(RobotMoveMessage.STOP, RobotMoveMessage.FULL));
-		} else if (moveMessage == null || moveMessage.getDirection() != RobotMoveMessage.FORWARD) {
-        	move(new RobotMoveMessage(RobotMoveMessage.FORWARD, RobotMoveMessage.FULL));
+			TTSLogger.log("Obstacle detected!");
+			TTSLogger.log("Reversing");
+        	move(new RobotMoveMessage(RobotMoveMessage.Direction.REVERSE, RobotMoveMessage.Speed.MEDIUM));
+			Thread.sleep(1000);
+			TTSLogger.log("Turning right");
+        	move(new RobotMoveMessage(RobotMoveMessage.Direction.RIGHT, RobotMoveMessage.Speed.FULL));
+			Thread.sleep(1000);
+			TTSLogger.log("Stopping");
+        	move(new RobotMoveMessage(RobotMoveMessage.Direction.STOP, RobotMoveMessage.Speed.FULL));
+		} else if (moveMessage == null || moveMessage.getDirection() != RobotMoveMessage.Direction.FORWARD) {
+			TTSLogger.log("Moving forward");
+        	move(new RobotMoveMessage(RobotMoveMessage.Direction.FORWARD, RobotMoveMessage.Speed.FULL));
 		}
 	}
 }

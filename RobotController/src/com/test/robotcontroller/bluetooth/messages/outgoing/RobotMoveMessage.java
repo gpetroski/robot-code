@@ -1,49 +1,88 @@
 package com.test.robotcontroller.bluetooth.messages.outgoing;
 
 public class RobotMoveMessage {
-	// Message Type
-	public final static int MOVE_MESSAGE_TYPE = 1; // 00000001
-	public final static int MESSAGE_TYPE_BITS = 3; // 00000011
 	
 	// DIRECTION
-	public final static int FORWARD = 4;  // 00000100
-	public final static int REVERSE = 8;  // 00001000
-	public final static int LEFT    = 12;  // 00001100
-	public final static int RIGHT   = 16; // 00010000
-	public final static int STOP    = 20; // 00010100	
-	public final static int DIRECTION_BITS = 28; // 00011100
+	public enum Direction {
+		FORWARD(4), // 00000100
+		REVERSE(8), // 00001000
+		LEFT(12),  // 00001100
+		RIGHT(16), // 00010000
+		STOP(20), // 00010100	
+		DIRECTION_BITS(28); // 00011100
+		
+		private int value;
+		
+		Direction(int value) {
+			this.value = value;
+		}
+		
+		public int getIntegerValue() {
+			return this.value;
+		}		
+		
+		public Direction valueOf(int value) {
+			for(Direction dir : values()) {
+				if(dir.getIntegerValue() == value) {
+					return dir;
+				}
+			}
+			return null;
+		}
+	}
 	
 	// SPEED
-	public final static int SLOW 	= 0;   // 00100000
-	public final static int MEDIUM  = 64;  // 01000000
-	public final static int FAST    = 96;  // 01100000
-	public final static int FULL    = 128; // 10000000	
-	public final static int SPEED_BITS   = 224; // 11100000
+	public enum Speed {
+		SLOW(0), // 00100000
+		MEDIUM(64), // 01000000
+		FAST(96),  // 01100000
+		FULL(128), // 10000000
+		SPEED_BITS(224); // 11100000	
+		
+		private int value;
+		
+		Speed(int value) {
+			this.value = value;
+		}
+		
+		public int getIntegerValue() {
+			return this.value;
+		}		
+		
+		public Speed valueOf(int value) {
+			for(Speed speed : values()) {
+				if(speed.getIntegerValue() == value) {
+					return speed;
+				}
+			}
+			return null;
+		}	
+	}
 	
-	private Byte message;
+	private Direction direction;
+	private Speed speed;
+	private RobotMessageType messageType;
 	
-	public RobotMoveMessage(int direction, int power) {
-		message = (byte) (MOVE_MESSAGE_TYPE | direction | power);
+	public RobotMoveMessage(Direction direction, Speed speed) {
+		this.speed = speed;
+		this.direction = direction;
+		this.messageType = RobotMessageType.MOVE_MESSAGE_TYPE;
 	}
 
 	public Byte getMessage() {
-		return message;
+		return (byte) (messageType.getIntegerValue() | direction.getIntegerValue() | speed.getIntegerValue());
 	}
 
-	public void setMessage(Byte message) {
-		this.message = message;
+	public Speed getSpeed() {
+		return speed;
 	}
 	
-	public int getSpeed() {
-		return message & SPEED_BITS;
+	public Direction getDirection() {
+		return direction;
 	}
 	
-	public int getDirection() {
-		return message & DIRECTION_BITS;
-	}
-	
-	public int getMessageType() {
-		return message & MESSAGE_TYPE_BITS;
+	public RobotMessageType getMessageType() {
+		return messageType;
 	}
 	
 

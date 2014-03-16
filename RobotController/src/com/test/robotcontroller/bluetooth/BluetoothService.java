@@ -14,6 +14,7 @@ import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
 import com.test.robotcontroller.bluetooth.messages.RobotMessageQueue;
+import com.test.robotcontroller.tts.TTSLogger;
 
 public class BluetoothService {
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
@@ -112,7 +113,7 @@ public class BluetoothService {
         // Start the thread to manage the connection and perform transmissions
         connectedThread = new ConnectedThread(socket);
         connectedThread.start();
-
+        TTSLogger.log("Bluetooth connected");
         setState(STATE_CONNECTED);
     }
     

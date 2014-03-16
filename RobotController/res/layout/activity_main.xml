@@ -64,4 +64,14 @@
         android:textOff="@string/auto_pilot_off"
         android:textOn="@string/auto_pilot_on" />
 
+    <Button
+        android:id="@+id/speakBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/connectButton"
+        android:layout_alignRight="@+id/connectButton"
+        android:layout_below="@+id/autoPilotToggleButton"
+        android:layout_marginTop="20dp"
+        android:text="Speak" />
+
 </RelativeLayout>
