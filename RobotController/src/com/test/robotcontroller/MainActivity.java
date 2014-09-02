@@ -19,8 +19,8 @@ import android.widget.ImageButton;
 import android.widget.ToggleButton;
 
 import com.test.robotcontroller.bluetooth.BluetoothService;
-import com.test.robotcontroller.bluetooth.messages.RobotMessageQueue;
 import com.test.robotcontroller.bluetooth.messages.outgoing.RobotMoveMessage;
+import com.test.robotcontroller.proximity.RobotProximityQueue;
 import com.test.robotcontroller.tts.TTSLogger;
 
 public class MainActivity extends Activity  implements TextToSpeech.OnInitListener {
@@ -29,7 +29,7 @@ public class MainActivity extends Activity  implements TextToSpeech.OnInitListen
 	private static final int REQUEST_CONNECT_DEVICE = 2;
 	private BluetoothService bluetoothService;
 	private Intent connectIntent;
-	private RobotMessageQueue messageQueue;
+	private RobotProximityQueue messageQueue;
 	private AutoPilotController autoPilotController;
 	private TTSLogger ttsLog;
 	
@@ -44,7 +44,7 @@ public class MainActivity extends Activity  implements TextToSpeech.OnInitListen
         super.onStart();
 		
 		try {
-			messageQueue = new RobotMessageQueue();
+			messageQueue = new RobotProximityQueue();
 			BluetoothService.setCurrentService(new BluetoothService(messageQueue));
 			bluetoothService = BluetoothService.getCurrentService();			
 			autoPilotController = new AutoPilotController(messageQueue, bluetoothService);

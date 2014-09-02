@@ -13,7 +13,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
-import com.test.robotcontroller.bluetooth.messages.RobotMessageQueue;
+import com.test.robotcontroller.proximity.RobotProximityQueue;
 import com.test.robotcontroller.tts.TTSLogger;
 
 public class BluetoothService {
@@ -29,9 +29,9 @@ public class BluetoothService {
     private ConnectThread connectThread;
     private ConnectedThread connectedThread;
 	private int state = 0;		
-	private RobotMessageQueue incomingMessages;
+	private RobotProximityQueue incomingMessages;
    	
-	public BluetoothService(RobotMessageQueue queue) throws Exception {
+	public BluetoothService(RobotProximityQueue queue) throws Exception {
         // Get local Bluetooth adapter
 		bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -48,7 +48,7 @@ public class BluetoothService {
 	}
 	
 	public void sendMessage(Byte message) {
-		Log.d(LOG_TAG, "Sending message " + message);
+		Log.d(LOG_TAG, "Sending message " + Integer.toBinaryString(message & 0xFF));
 		if(connectedThread != null && state == STATE_CONNECTED) {
 			connectedThread.write(message);
 		}
@@ -122,11 +122,11 @@ public class BluetoothService {
         this.state = state;
     }
 	
-	public RobotMessageQueue getIncomingMessages() {
+	public RobotProximityQueue getIncomingMessages() {
 		return incomingMessages;
 	}
 
-	public void setIncomingMessages(RobotMessageQueue incomingMessages) {
+	public void setIncomingMessages(RobotProximityQueue incomingMessages) {
 		this.incomingMessages = incomingMessages;
 	}
 

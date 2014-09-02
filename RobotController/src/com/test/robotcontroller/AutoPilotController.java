@@ -3,22 +3,20 @@ package com.test.robotcontroller;
 import android.util.Log;
 
 import com.test.robotcontroller.bluetooth.BluetoothService;
-import com.test.robotcontroller.bluetooth.messages.RobotMessageQueue;
 import com.test.robotcontroller.bluetooth.messages.outgoing.RobotMoveMessage;
+import com.test.robotcontroller.proximity.RobotProximityQueue;
 import com.test.robotcontroller.tts.TTSLogger;
 
 public class AutoPilotController implements Runnable {
 	private static final String LOG_TAG = AutoPilotController.class.getCanonicalName();
-	private static final int QUEUE_SIZE = 10;
-	private static final int MAX_SIZE = 100;
 	private static final int TOO_CLOSE = 20;
-	private RobotMessageQueue proximities;
+	private RobotProximityQueue proximities;
 	private BluetoothService bluetooth;
 	private boolean running = false;
 	private RobotMoveMessage moveMessage;
 	
 	
-	public AutoPilotController(RobotMessageQueue proximities, BluetoothService bluetooth) {
+	public AutoPilotController(RobotProximityQueue proximities, BluetoothService bluetooth) {
 		this.proximities = proximities;
 		this.bluetooth = bluetooth;
 	}
@@ -28,7 +26,7 @@ public class AutoPilotController implements Runnable {
 		running = true;
 		while(running) {
 			try {
-				adjustHeading(getAvgReading());
+				adjustHeading(proximities.getAvgReading());
 			} catch (InterruptedException e) {
 				Log.e(LOG_TAG, e.getMessage());
 			}
@@ -52,21 +50,6 @@ public class AutoPilotController implements Runnable {
 	private void move(RobotMoveMessage message) {
 		moveMessage = message;
 		bluetooth.sendMessage(moveMessage.getMessage());
-	}
-	
-	private int getAvgReading() {
-		int sum = 0;
-		if(proximities.getProximityCount() > MAX_SIZE) {
-			TTSLogger.log("Queue is backing up!");
-		}
-		if(proximities.getProximityCount() >= QUEUE_SIZE) {
-			for(int i = 0; i < QUEUE_SIZE; i++) {
-				sum += proximities.getNextProximity().getValue();
-			}
-			return sum / QUEUE_SIZE;
-		} else {
-			return -1;
-		}
 	}
 	
 	private void adjustHeading(int proximity) throws InterruptedException {
