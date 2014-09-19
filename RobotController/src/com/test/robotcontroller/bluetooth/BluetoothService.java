@@ -30,6 +30,7 @@ public class BluetoothService {
     private ConnectedThread connectedThread;
 	private int state = 0;		
 	private RobotProximityQueue incomingMessages;
+	private boolean sync = false;
    	
 	public BluetoothService(RobotProximityQueue queue) throws Exception {
         // Get local Bluetooth adapter
@@ -51,6 +52,20 @@ public class BluetoothService {
 		Log.d(LOG_TAG, "Sending message " + Integer.toBinaryString(message & 0xFF));
 		if(connectedThread != null && state == STATE_CONNECTED) {
 			connectedThread.write(message);
+		}
+	}
+	
+	public void sendSynchronousMessage(Byte message) {
+		Log.d(LOG_TAG, "Sending synchronous message " + Integer.toBinaryString(message & 0xFF));
+		if(connectedThread != null && state == STATE_CONNECTED) {
+			sync = true;
+			connectedThread.write(message);
+		}
+		while(sync) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+			}
 		}
 	}
 	
@@ -211,8 +226,9 @@ public class BluetoothService {
 
 	                String message = in.readLine();
 	                if(message != null) {
+	                	sync = false;
 		    			incomingMessages.queueMessage(message);
-		                Log.d(LOG_TAG, message);
+		                //Log.d(LOG_TAG, message);
 	                }
 	            } catch (IOException e) {
 	                break;
@@ -224,6 +240,7 @@ public class BluetoothService {
 	    public void write(Byte message) {
 	        try {
 	            mmOutStream.write(message);
+	            mmOutStream.flush();
 	        } catch (IOException e) { }
 	    }
 	 

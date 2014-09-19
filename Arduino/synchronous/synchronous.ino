@@ -15,8 +15,9 @@ int bufferIndex = 0;
 int proxIndex = 1;
 
 // Message Type
-const int MOVE_MESSAGE_TYPE = 1; // 00000001
-const int MESSAGE_TYPE_BITS = 3; // 00000011
+const int MOVE_MESSAGE_TYPE = 1; // 0000_0001
+const int GET_PING_MESSAGE_TYPE = 2; // 0000_0010
+const int MESSAGE_TYPE_BITS = 3; // 0000_0011
 	
 // DIRECTION
 const int FW = 4;  // 00000100
@@ -37,7 +38,6 @@ volatile boolean READING = false;
 volatile boolean WRITING = false;
 
 SoftwareSerial bluetooth(BT_TX, BT_RX);
-TimedAction timedAction = TimedAction(100, measureAndTransmitProximity);
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
 
 AF_DCMotor rightMotor(1); // create motor #2, 64KHz pwm
@@ -62,15 +62,20 @@ void loop()
 {
   byte message = 0;
   while((message = readBluetoothMessageByte()) > 0) {
-    Serial.print("Message type: ");
-    Serial.println(message & MESSAGE_TYPE_BITS);
-    if((message & MESSAGE_TYPE_BITS) == MOVE_MESSAGE_TYPE) {
-      Serial.print("Message direction: ");
-      Serial.println(message & DIRECTION_BITS);
-      moveDirection(message & DIRECTION_BITS, message & SPEED_BITS);
+    int messageType = message & MESSAGE_TYPE_BITS;
+    Serial.print("Message type: ");    
+    Serial.println(messageType);
+    switch(messageType) {
+    case MOVE_MESSAGE_TYPE:
+        Serial.print("Message direction: ");
+        Serial.println(message & DIRECTION_BITS);
+        moveDirection(message & DIRECTION_BITS, message & SPEED_BITS);
+        break;
+    case GET_PING_MESSAGE_TYPE:
+        measureAndTransmitProximity();
+        break;    
     }
   }
-  timedAction.check();
 }
 
 byte readBluetoothMessageByte() {

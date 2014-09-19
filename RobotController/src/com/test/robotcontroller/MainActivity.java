@@ -20,6 +20,7 @@ import android.widget.ToggleButton;
 
 import com.test.robotcontroller.bluetooth.BluetoothService;
 import com.test.robotcontroller.bluetooth.messages.outgoing.RobotMoveMessage;
+import com.test.robotcontroller.bluetooth.messages.outgoing.RobotMoveMessage.Direction;
 import com.test.robotcontroller.proximity.RobotProximityQueue;
 import com.test.robotcontroller.tts.TTSLogger;
 
@@ -154,7 +155,11 @@ public class MainActivity extends Activity  implements TextToSpeech.OnInitListen
     
     public void sendManualMove(RobotMoveMessage message) {
     	if(!autoPilotController.isRunning()) {
-    		TTSLogger.log("Moving in " + message.getDirection().name().toLowerCase() + " direction at " + message.getSpeed().name().toLowerCase() + " speed.");
+    		if(message.getDirection() == Direction.STOP) {
+    			TTSLogger.log("Stopping");
+    		} else {
+    			TTSLogger.log("Moving " + message.getDirection().name().toLowerCase());
+    		}
     		bluetoothService.sendMessage(message.getMessage());
     	} else {
     		TTSLogger.log("Disable Autopilot to control manually");

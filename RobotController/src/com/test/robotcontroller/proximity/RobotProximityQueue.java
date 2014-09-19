@@ -1,6 +1,6 @@
 package com.test.robotcontroller.proximity;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
 
 import android.util.Log;
 
@@ -11,16 +11,13 @@ import com.test.robotcontroller.bluetooth.messages.RobotProximityMessage;
 public class RobotProximityQueue {
 	private static final int QUEUE_SIZE = 10;
 	private static final String LOG_TAG = RobotProximityQueue.class.getCanonicalName();
-	ConcurrentLinkedQueue<RobotProximityMessage> proximityReadings = new ConcurrentLinkedQueue<RobotProximityMessage>();
+	CircularFifoQueue<RobotProximityMessage> proximityReadings = new CircularFifoQueue<RobotProximityMessage>(QUEUE_SIZE);
 	
 	public void queueMessage(String message) {
 		try {
 			Gson gson = new Gson();	
 			if(message.contains("PROXIMITY")) {
 				proximityReadings.add(gson.fromJson(message, RobotProximityMessage.class));
-				if(proximityReadings.size() > QUEUE_SIZE) {
-					proximityReadings.poll();
-				}
 			} else if(message.contains("LOG")) {
                 Log.i(LOG_TAG, gson.fromJson(message, RobotLogMessage.class).getMessage());
 			}
