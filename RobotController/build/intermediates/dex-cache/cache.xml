@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="/home/greg/.gradle/caches/modules-2/files-2.1/com.squareup.dagger/dagger/1.2.2/e8f912ee19ad84958510883ea191135276b091f8/dagger-1.2.2.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="e8f912ee19ad84958510883ea191135276b091f8">
+        <dex dex="/home/greg/projects/robot-code/RobotController/app/build/intermediates/pre-dexed/debug/dagger-1.2.2-f04f346af315c9be51ded823fee972b778d2e6b7.jar" />
+    </item>
+    <item
+        jar="/home/greg/projects/robot-code/RobotController/app/libs/commons-collections4-4.0.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="da217367fd25e88df52ba79e47658d4cf928b0d1">
+        <dex dex="/home/greg/projects/robot-code/RobotController/app/build/intermediates/pre-dexed/debug/commons-collections4-4.0-ecd3f46c84b5e794332a803e2617c3316141beef.jar" />
+    </item>
+    <item
+        jar="/home/greg/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.2.4/a60a5e993c98c864010053cb901b7eab25306568/gson-2.2.4.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="a60a5e993c98c864010053cb901b7eab25306568">
+        <dex dex="/home/greg/projects/robot-code/RobotController/app/build/intermediates/pre-dexed/debug/gson-2.2.4-afbe4ceadf4128a07f04887ebed7ea4402b6c5ff.jar" />
+    </item>
+    <item
+        jar="/home/greg/.gradle/caches/modules-2/files-2.1/javax.inject/javax.inject/1/6975da39a7040257bd51d21a231b76c915872d38/javax.inject-1.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="6975da39a7040257bd51d21a231b76c915872d38">
+        <dex dex="/home/greg/projects/robot-code/RobotController/app/build/intermediates/pre-dexed/debug/javax.inject-1-302c60e643cd6926154abb328250576353a15c1a.jar" />
+    </item>
+    <item
+        jar="/home/greg/.gradle/caches/modules-2/files-2.1/de.greenrobot/eventbus/2.4.0/ddd166d01b3158d1c00576d29f7ed15c030df719/eventbus-2.4.0.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="ddd166d01b3158d1c00576d29f7ed15c030df719">
+        <dex dex="/home/greg/projects/robot-code/RobotController/app/build/intermediates/pre-dexed/debug/eventbus-2.4.0-1b2fea7196e0d7587a1c7abe49e29ddd94b6f916.jar" />
+    </item>
+
+</items>
