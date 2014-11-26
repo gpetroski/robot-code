@@ -1,0 +1,27 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 17
+    buildToolsVersion "20.0.0"
+
+    defaultConfig {
+        applicationId "com.test.robotcontroller"
+        minSdkVersion 8
+        targetSdkVersion 12
+    }
+
+    buildTypes {
+        release {
+            runProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+}
+
+dependencies {
+    provided 'com.squareup.dagger:dagger-compiler:1.2.2'
+    compile 'com.google.code.gson:gson:2.2.4'
+    compile files('libs/commons-collections4-4.0.jar')
+    compile 'de.greenrobot:eventbus:2.4.0'
+    compile 'com.squareup.dagger:dagger:1.2.2'
+}

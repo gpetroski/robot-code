@@ -1,0 +1,77 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/connect"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".MainActivity" >
+
+    <ImageButton
+        android:id="@+id/rightButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/downButton"
+        android:layout_marginBottom="29dp"
+        android:layout_toRightOf="@+id/upButton"
+        android:src="@drawable/right" />
+
+    <ImageButton
+        android:id="@+id/leftButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/rightButton"
+        android:layout_toLeftOf="@+id/upButton"
+        android:src="@drawable/left" />
+
+    <Button
+        android:id="@+id/connectButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="44dp"
+        android:text="Connect To Bluetooth Device" />
+
+    <ImageButton
+        android:id="@+id/upButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/downButton"
+        android:layout_below="@+id/connectButton"
+        android:layout_marginTop="30dp"
+        android:src="@drawable/up" />
+
+    <ImageButton
+        android:id="@+id/downButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/upButton"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/down" />
+
+    <ToggleButton
+        android:id="@+id/autoPilotToggleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rightButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="45dp"
+        android:text="ToggleButton"
+        android:textOff="@string/auto_pilot_off"
+        android:textOn="@string/auto_pilot_on" />
+
+    <Button
+        android:id="@+id/speakBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/connectButton"
+        android:layout_alignRight="@+id/connectButton"
+        android:layout_below="@+id/autoPilotToggleButton"
+        android:layout_marginTop="20dp"
+        android:text="Speak" />
+
+</RelativeLayout><!-- From: file:/home/greg/AndroidstudioProjects/RobotController/app/src/main/res/layout/activity_main.xml -->
