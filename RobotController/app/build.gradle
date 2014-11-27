@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 17
+    compileSdkVersion 8
     buildToolsVersion "20.0.0"
 
     defaultConfig {
         applicationId "com.test.robotcontroller"
         minSdkVersion 8
-        targetSdkVersion 12
+        targetSdkVersion 17
     }
 
     buildTypes {
@@ -26,4 +26,5 @@ dependencies {
     compile 'com.squareup.dagger:dagger:1.2.2'
     testCompile 'org.robolectric:robolectric:2.3'
     testCompile 'junit:junit:4.10'
+    testCompile 'org.mockito:mockito-all:1.10.8'
 }

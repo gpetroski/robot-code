@@ -23,7 +23,7 @@ import de.greenrobot.event.EventBus;
 
  */
 public class HalfDuplexReadingThread implements Runnable {
-    private static final String LOG_TAG = HalfDuplexSerialController.class.getCanonicalName();
+    private static final String LOG_TAG = HalfDuplexReadingThread.class.getCanonicalName();
     private static final int ERROR_THRESHOLD = 5;
     HalfDuplexState state;
     InputStream inputStream;
@@ -42,11 +42,13 @@ public class HalfDuplexReadingThread implements Runnable {
 
     public void doReads() {
         int errorCount = 0;
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        int input;
 
         while(state.isRunning()) {
             try {
-                String input = reader.readLine();
+                if((input = inputStream.read()) <= 0) {
+                    continue;
+                }
                 switch (state.getMode()) {
                     case IDLE:
                         doIdleRead(input);
@@ -69,30 +71,20 @@ public class HalfDuplexReadingThread implements Runnable {
         }
     }
 
-    private void doIdleRead(String input) throws IOException {
-        Integer value = getIntegerValue(input);
-        if(value == null) {
-            Log.d(LOG_TAG, "Invalid input received. Expected integer. Actual: " + input);
-            return;
-        }
-        switch (value) {
+    private void doIdleRead(Integer input) throws IOException {
+        switch (input) {
             case HalfDuplexState.REQUEST_LOCK:
                 state.setMode(SerialMode.RECEIVING);
                 state.setPhase(SerialPhase.LOCK_REQUESTED);
                 Log.d(LOG_TAG, "Lock requested");
                 break;
             default:
-                Log.d(LOG_TAG, "Ignoring input " + input);
+                Log.d(LOG_TAG, "Ignoring input in IDLE " + input);
         }
     }
 
-    private void doSendingRead(String input) {
-        Integer value = getIntegerValue(input);
-        if(value == null) {
-            Log.d(LOG_TAG, "Invalid input received. Expected integer. Actual: " + input);
-            return;
-        }
-        switch (value) {
+    private void doSendingRead(Integer input) {
+        switch (input) {
             case HalfDuplexState.LOCK_GRANTED:
                 state.setPhase(SerialPhase.LOCK_GRANTED);
                 Log.d(LOG_TAG, "Lock granted");
@@ -101,23 +93,20 @@ public class HalfDuplexReadingThread implements Runnable {
                 state.setPhase(SerialPhase.MESSAGE_CONFIRMED);
                 Log.d(LOG_TAG, "Message confirmed");
             default:
-                Log.d(LOG_TAG, "Ignoring input " + input);
+                Log.d(LOG_TAG, "Ignoring input in SENDING " + input);
         }
 
     }
 
-    private void doReceivingRead(String input) {
-        Integer value = getIntegerValue(input);
-        if(value == null) {
+    private void doReceivingRead(Integer input) {
+        if(input == HalfDuplexState.RELINQUISH_LOCK) {
+            Log.d(LOG_TAG, "Relinquishing lock");
+            state.resetModeAndPhase();
+        } else {
             Log.d(LOG_TAG, "Input received: " + input);
             ReadEvent readEvent = new ReadEvent();
             readEvent.setMessage(input);
             eventBus.post(readEvent);
-        } else if(value == HalfDuplexState.RELINQUISH_LOCK) {
-            Log.d(LOG_TAG, "Relinquishing lock");
-            state.resetModeAndPhase();
-        } else {
-            Log.d(LOG_TAG, "Ignoring input " + input);
         }
     }
 

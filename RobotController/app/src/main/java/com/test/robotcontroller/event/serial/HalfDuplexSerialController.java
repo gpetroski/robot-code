@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.test.robotcontroller.event.outgoing.WriteEvent;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -31,6 +32,7 @@ public class HalfDuplexSerialController {
     public void start() {
         Log.i(LOG_TAG, "Starting HalfDuplexSerialController reading and writing threads.");
         state = new HalfDuplexState();
+        state.setRunning(true);
         readingThread = new HalfDuplexReadingThread(eventBus, inputStream, state);
         writingThread = new HalfDuplexWritingThread(outputStream, state);
         new Thread(readingThread).start();
@@ -40,6 +42,12 @@ public class HalfDuplexSerialController {
     public void stop() {
         Log.i(LOG_TAG, "Stopping HalfDuplexSerialController reading and writing threads.");
         state.setRunning(false);
+        try {
+            inputStream.close();
+            outputStream.close();
+        } catch(IOException ex) {
+            // Ignore
+        }
     }
 
     public void onEvent(WriteEvent writeEvent) {

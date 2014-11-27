@@ -70,9 +70,11 @@ public class HalfDuplexWritingThread implements Runnable {
     private void doSendingWrite() throws IOException {
         switch (state.getPhase()) {
             case LOCK_GRANTED:
+                Log.d(LOG_TAG, "In LOCK_GRANTED. Writing next value. Setting MESSAGE_WRITTEN");
                 state.setPhase(SerialPhase.MESSAGE_WRITTEN);
                 doWrite(queue.poll().intValue());
             case MESSAGE_CONFIRMED:
+                Log.d(LOG_TAG, "In MESSAGE_CONFIRMED. Setting LOCK_RELINQUISHED");
                 state.setPhase(SerialPhase.LOCK_RELINQUISHED);
                 doWrite(HalfDuplexState.RELINQUISH_LOCK);
                 state.resetModeAndPhase();
@@ -82,9 +84,11 @@ public class HalfDuplexWritingThread implements Runnable {
     private void doReceivingWrite() throws IOException {
         switch (state.getPhase()) {
             case LOCK_REQUESTED:
+                Log.d(LOG_TAG, "In LOCK_REQUESTED. Setting LOCK_GRANTED");
                 state.setPhase(SerialPhase.LOCK_GRANTED);
                 doWrite(HalfDuplexState.LOCK_GRANTED);
             case MESSAGE_WRITTEN:
+                Log.d(LOG_TAG, "In MESSAGE_WRITTEN. Setting MESSAGE_CONFIRMED");
                 state.setPhase(SerialPhase.MESSAGE_CONFIRMED);
                 doWrite(HalfDuplexState.MESSAGE_CONFIRMED);
         }
@@ -98,6 +102,7 @@ public class HalfDuplexWritingThread implements Runnable {
 
     private void doIdleWrite() throws IOException {
         if (queue.isEmpty()) return;
+        Log.d(LOG_TAG, "In IDLE mode. Setting mode to SENDING. Setting LOCK_REQUESTED");
         state.setMode(SerialMode.SENDING);
         state.setPhase(SerialPhase.LOCK_REQUESTED);
         doWrite(HalfDuplexState.REQUEST_LOCK);
